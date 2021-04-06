@@ -11,7 +11,7 @@
     <ProductVersion>10.0.20506</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <RootNamespace></RootNamespace>
-    <ProjectGuid>{EE80C96C-A26F-4826-F966-FF933B01D041}</ProjectGuid>
+    <ProjectGuid>{F904324D-0724-88C0-CF1C-4244502A4A03}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <AssemblyName>Assembly-CSharp</AssemblyName>
@@ -64,7 +64,10 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\BlockControl.cs" />
     <Compile Include="Assets\Scripts\BlockRoot.cs" />
+    <Compile Include="Assets\Scripts\LevelControl.cs" />
     <Compile Include="Assets\Scripts\SceneControl.cs" />
+    <Compile Include="Assets\Scripts\ScoreCounter.cs" />
+    <None Include="Assets\Scripts\Level_Data.txt" />
     <None Include="Assets\Shader\etmBlock.shader" />
     <Reference Include="UnityEngine">
       <HintPath>C:/Program Files (x86)/Unity/2019.4.13f1/Editor/Data/Managed/UnityEngine/UnityEngine.dll</HintPath>
@@ -595,31 +598,31 @@
       <HintPath>C:/Program Files (x86)/Unity/2019.4.13f1/Editor/Data/NetStandard/compat/2.0.0/shims/netfx/System.Xml.Serialization.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline.Editor">
-      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGame/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
+      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGameMake/Library/ScriptAssemblies/Unity.Timeline.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.VSCode.Editor">
-      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGame/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
+      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGameMake/Library/ScriptAssemblies/Unity.VSCode.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro.Editor">
-      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGame/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
+      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGameMake/Library/ScriptAssemblies/Unity.TextMeshPro.Editor.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI">
-      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGame/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
+      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGameMake/Library/ScriptAssemblies/UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Timeline">
-      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGame/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
+      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGameMake/Library/ScriptAssemblies/Unity.Timeline.dll</HintPath>
     </Reference>
     <Reference Include="Unity.CollabProxy.Editor">
-      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGame/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
+      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGameMake/Library/ScriptAssemblies/Unity.CollabProxy.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Rider.Editor">
-      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGame/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
+      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGameMake/Library/ScriptAssemblies/Unity.Rider.Editor.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGame/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
+      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGameMake/Library/ScriptAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEditor.UI">
-      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGame/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
+      <HintPath>C:/Users/KimTaejun/Desktop/PuzzleGame/PuzzleGameMake/Library/ScriptAssemblies/UnityEditor.UI.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup></ItemGroup>

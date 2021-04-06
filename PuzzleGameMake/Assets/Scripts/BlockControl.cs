@@ -12,6 +12,8 @@ public class Block
         public int x; // X 좌표.
         public int y; // Y 좌표.
     }
+
+
     public enum COLOR
     { // 블록 색상.
         NONE = -1, // 색 지정 없음.
@@ -21,12 +23,16 @@ public class Block
         FIRST = PINK, LAST = ORANGE, // 초기 컬러(분홍색), 최종 컬러(주황색).
         NORMAL_COLOR_NUM = GRAY, // 보통 컬러(회색 이외의 색)의 수.
     };
+
+
     public enum DIR4
     { // 상하좌우 네 방향.
         NONE = -1, // 방향지정 없음.
         RIGHT, LEFT, UP, DOWN, // 우. 좌, 상, 하.
         NUM, // 방향이 몇 종류 있는지 나타낸다(=4).
     };
+
+
     public static int BLOCK_NUM_X = 9; // 블록을 배치할 수 있는 X방향 최대수.
     public static int BLOCK_NUM_Y = 9; // 블록을 배치할 수 있는 Y방향 최대수.
 
@@ -52,6 +58,15 @@ public class BlockControl : MonoBehaviour
     public Block.DIR4 slide_dir = Block.DIR4.NONE; // 슬라이드된 방향.
     public float step_timer = 0.0f; // 블록이 교체된 때의 이동시간 등.
 
+    public Material opague_material; // 불투명 머티리얼.
+    public Material transparent_material; // 반투명 머티리얼.
+
+    private struct StepFall
+    {
+        public float velocity; // 낙하 속도.
+    }
+    private StepFall fall;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -67,6 +82,23 @@ public class BlockControl : MonoBehaviour
         Vector3 mouse_position; // 마우스 위치.
         this.block_root.unprojectMousePosition(out mouse_position, Input.mousePosition); // 마우스 위치 획득.
         Vector2 mouse_position_xy = new Vector2(mouse_position.x, mouse_position.y); // 획득한 마우스 위치를 X와 Y만으로 한다.
+        if (this.vanish_timer >= 0.0f)
+        { // 타이머가 0 이상이면.
+            this.vanish_timer -= Time.deltaTime; // 타이머의 값을 줄인다.
+            if (this.vanish_timer < 0.0f)
+            { // 타이머가 0 미만이면.
+                if (this.step != Block.STEP.SLIDE)
+                { // 슬라이드 중이 아니라면.
+                    this.vanish_timer = -1.0f;
+                    this.next_step = Block.STEP.VACANT; // 상태를 ‘소멸 중’으로.
+                }
+                else
+                {
+                    this.vanish_timer = 0.0f;
+                }
+            }
+        }
+
 
         this.step_timer += Time.deltaTime;
         float slide_time = 0.2f;
@@ -87,6 +119,16 @@ public class BlockControl : MonoBehaviour
                         }
                     }
                     break;
+                case Block.STEP.IDLE:
+                    this.GetComponent<Renderer>().enabled = true;
+                    break;
+                case Block.STEP.FALL:
+                    if (this.position_offset.y <= 0.0f)
+                    {
+                        this.next_step = Block.STEP.IDLE;
+                        this.position_offset.y = 0.0f;
+                    }
+                    break;
             }
         }
 
@@ -94,6 +136,7 @@ public class BlockControl : MonoBehaviour
         { // '다음 블록' 상태가 '정보 없음' 이외인 동안. ＝> '다음 블록' 상태가 변경된 경우.
             this.step = this.next_step;
             this.next_step = Block.STEP.NONE;
+
             switch (this.step)
             {
                 case Block.STEP.IDLE: // '대기' 상태.
@@ -105,7 +148,18 @@ public class BlockControl : MonoBehaviour
                     this.position_offset = Vector3.zero;
                     this.transform.localScale = Vector3.one * 1.0f; break;
                 case Block.STEP.VACANT:
-                    this.position_offset = Vector3.zero; break;
+                    this.position_offset = Vector3.zero;
+                    this.setVisible(false);
+                    break;
+                case Block.STEP.RESPAWN:
+                    int color_index = Random.Range(0, (int)Block.COLOR.NORMAL_COLOR_NUM); // 색을 랜덤하게 선택하여 블록을 그 색으로 설정.
+                    this.setColor((Block.COLOR)color_index);
+                    this.next_step = Block.STEP.IDLE;
+                    break;
+                case Block.STEP.FALL:
+                    this.setVisible(true); // 블록을 표시.
+                    this.fall.velocity = 0.0f; // 낙하 속도 리셋.
+                    break;
             }
             this.step_timer = 0.0f;
         }
@@ -118,11 +172,38 @@ public class BlockControl : MonoBehaviour
                 rate = Mathf.Min(rate, 1.0f);
                 rate = Mathf.Sin(rate * Mathf.PI / 2.0f);
                 this.position_offset = Vector3.Lerp(this.position_offset_initial, Vector3.zero, rate); break;
+            case Block.STEP.FALL:
+                this.fall.velocity += Physics.gravity.y * Time.deltaTime * 0.3f; // 속도에 중력의 영향을 부여한다.
+                this.position_offset.y += this.fall.velocity * Time.deltaTime; // 세로 방향 위치를 계산.
+                if (this.position_offset.y < 0.0f)
+                { // 다 내려왔다면.
+                    this.position_offset.y = 0.0f; // 그 자리에 머무른다.
+                }
+                break;
+
         }
         // 블록 표시 크기를 보통 사이즈로 한다.
         // 그리드 좌표를 실제 좌표(씬의 좌표)로 변환하고.
         Vector3 position = BlockRoot.calcBlockPosition(this.i_pos) + this.position_offset; // position_offset을 추가한다.
         this.transform.position = position; // 실제 위치를 새로운 위치로 변경한다.
+
+        this.setColor(this.color);
+
+        if (this.vanish_timer >= 0.0f)
+        {
+            float vanish_time = this.block_root.level_control.getVanishTime(); //=================================================================
+
+            Color color0 = Color.Lerp(this.GetComponent<Renderer>().material.color, Color.white, 0.5f); // 현재 색과 흰색의 중간 색.
+            Color color1 = Color.Lerp(this.GetComponent<Renderer>().material.color, Color.black, 0.5f); // 현재 색과 검은색의 중간 색.
+            if (this.vanish_timer < Block.VANISH_TIME / 2.0f)
+            { // 불붙는 연출 시간이 절반을 지났다면.
+                color0.a = this.vanish_timer / (Block.VANISH_TIME / 2.0f); // 투명도(a)를 설정.
+                color1.a = color0.a;
+                this.GetComponent<Renderer>().material = this.transparent_material;
+            } // 반투명 머티리얼을 적용.
+            float rate = 1.0f - this.vanish_timer / Block.VANISH_TIME; // vanish_timer가 줄어들수록 1에 가까워진다.
+            this.GetComponent<Renderer>().material.color = Color.Lerp(color0, color1, rate); // 서서히 색을 바꾼다.
+        }
     }
 
     public void setColor(Block.COLOR color)
@@ -230,4 +311,90 @@ public class BlockControl : MonoBehaviour
         this.position_offset = this.position_offset_initial;
         this.next_step = Block.STEP.SLIDE; // 상태를 SLIDE로 변경.
     }
+
+    public void toVanishing()
+    {
+        // '사라질 때까지 걸리는 시간'을 규정값으로 리셋.
+        //this.vanish_timer = Block.VANISH_TIME;
+
+        float vanish_time = this.block_root.level_control.getVanishTime();
+        this.vanish_timer = vanish_time;
+    }
+
+    public bool isVanishing()
+    {
+        // vanish_timer가 0보다 크면 true.
+        bool is_vanishing = (this.vanish_timer > 0.0f);
+        return (is_vanishing);
+    }
+
+    public void rewindVanishTimer()
+    {
+        // '사라질 때까지 걸리는 시간'을 규정값으로 리셋.
+        //this.vanish_timer = Block.VANISH_TIME;
+        float vanish_time = this.block_root.level_control.getVanishTime();
+        this.vanish_timer = vanish_time;
+    }
+
+    public bool isVisible()
+    {
+        // 그리기 가능(renderer.enabled가 true) 상태라면 표시.
+        bool is_visible = this.GetComponent<Renderer>().enabled;
+        return (is_visible);
+    }
+
+    public void setVisible(bool is_visible)
+    {
+        // 그리기 가능 설정에 인수를 대입.
+        this.GetComponent<Renderer>().enabled = is_visible;
+    }
+
+    public bool isIdle()
+    {
+        bool is_idle = false;
+        // 현재 블록 상태가 '대기 중'이고, 다음 블록 상태가 '없음'이면.
+        if (this.step == Block.STEP.IDLE && this.next_step == Block.STEP.NONE)
+        {
+            is_idle = true;
+        }
+        return (is_idle);
+    }
+
+    public void beginFall(BlockControl start)
+    { // 낙하 시작 처리를 한다.
+        this.next_step = Block.STEP.FALL;
+        this.position_offset.y = (float)(start.i_pos.y - this.i_pos.y) * Block.COLLISION_SIZE; // 지정된 블록에서 좌표를 계산해 낸다.
+    }
+
+    public void beginRespawn(int start_ipos_y)
+    { // 색이 바꿔 낙하 상태로 하고 지정한 위치에 재배치한다.
+        this.position_offset.y = (float)(start_ipos_y - this.i_pos.y) * Block.COLLISION_SIZE; // 지정 위치까지 y좌표를 이동.
+        this.next_step = Block.STEP.FALL;
+
+        // 주석 처리 혹은 삭제
+        // int color_index = Random.Range((int)Block.COLOR.FIRST, (int)Block.COLOR.LAST + 1);
+        // this.setColor((Block.COLOR)color_index);
+        // 현재 레벨의 출현 확률을 바탕으로 블록의 색을 결정한다.
+        Block.COLOR color = this.block_root.selectBlockColor();
+        this.setColor(color);
+
+        //int color_index = Random.Range((int)Block.COLOR.FIRST, (int)Block.COLOR.LAST + 1);
+        //this.setColor((Block.COLOR)color_index);
+    }
+
+    public bool isVacant()
+    { // 블록이 비표시(그리드상의 위치가 텅 빔)로 되어 있다면 true를 반환한다.
+        bool is_vacant = false;
+        if(this.step == Block.STEP.VACANT && this.next_step == Block.STEP.NONE) {
+            is_vacant = true;
+        }
+        return (is_vacant);
+    }
+
+    public bool isSliding()
+    { // 교체 중(슬라이드 중)이라면 true를 반환한다.
+        bool is_sliding = (this.position_offset.x != 0.0f);
+        return (is_sliding);
+    }
+
 }
